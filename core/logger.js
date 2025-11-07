@@ -50,10 +50,6 @@ function dailyFilePath(dateStr) {
   return path.join(logDir, `${logBaseName}.${dateStr}.log`);
 }
 
-function stableFilePath() {
-  return path.join(logDir, `${logBaseName}.log`);
-}
-
 function cleanOldDailyLogs() {
   // 仅在日期变更时进行清理, 避免频繁 IO
   const nowStr = currDateStr || dateStrYYYYMMDD();
@@ -79,7 +75,6 @@ function cleanOldDailyLogs() {
 }
 
 function writeToFiles(line) {
-  try { fs.appendFileSync(stableFilePath(), line + '\n'); } catch {}
   try { fs.appendFileSync(dailyFilePath(currDateStr), line + '\n'); } catch {}
 }
 
