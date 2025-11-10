@@ -108,7 +108,17 @@ function fmtFields(fields) {
     if (v === undefined) continue;
     let val;
     if (Array.isArray(v)) {
-      val = `[${v.join(',')}]`;
+      // 改进数组打印: 若元素为对象则使用 JSON 序列化, 避免 [object Object]
+      try {
+        const hasObj = v.some(x => x && typeof x === 'object');
+        if (hasObj) {
+          val = JSON.stringify(v);
+        } else {
+          val = `[${v.join(',')}]`;
+        }
+      } catch {
+        val = `[${v.join(',')}]`;
+      }
     } else if (v && typeof v === 'object') {
       try {
         val = JSON.stringify(v);

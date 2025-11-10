@@ -22,7 +22,6 @@ async function updateWbiKeyIfNeeded(cookie) {
   const now = Date.now();
   if (wbiKey && (now - wbiLastUpdate) < config.wbiUpdateIntervalMs) return;
   const url = 'https://api.bilibili.com/x/web-interface/nav';
-  log.info('wbi', '刷新 wbi key');
   const headers = {
     'Accept': 'application/json, text/javascript, */*; q=0.01',
     'Accept-Language': 'zh-CN',
@@ -45,7 +44,6 @@ async function updateWbiKeyIfNeeded(cookie) {
   }
   wbiKey = keyChars.join('');
   wbiLastUpdate = now;
-  log.info('wbi', 'key 更新完成');
 }
 
 function wbiSign(params) {

@@ -45,7 +45,6 @@ async function getCookie() {
       const resp = await httpGet(url, { token: config.cookieMgmt.token }, config.httpErrorRepeat, config.httpTimeoutMs);
       const body = resp.data;
       const ck = unifyCookieFromResponse(body);
-      log.info('cookie', 'cookie 拉取成功', { source: 'cookieMgmt' });
       return ck;
     } catch (e) {
       log.warn('cookie', 'cookieMgmt 拉取失败, 准备回退', { message: e?.message || String(e) });

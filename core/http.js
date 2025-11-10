@@ -42,21 +42,11 @@ async function httpGet(url, headers = {}, retry = 0, timeoutMs = 15000) {
     const ctrl = controllers[i];
     attempts.push((async () => {
       try {
-        if (log.isDebug()) {
-          log.debug('http', 'GET attempt', { url, attempt: i + 1, total: hedgedCount });
-        }
         const opts = { headers, timeout: timeoutMs };
         if (ctrl && ctrl.signal) opts.signal = ctrl.signal;
         const resp = await axios.get(url, opts);
         return { index: i, resp };
       } catch (e) {
-        const canceled = e?.name === 'CanceledError' || e?.code === 'ERR_CANCELED' || /canceled/i.test(e?.message || '');
-        const status = e?.response?.status;
-        if (canceled) {
-          log.debug('http', 'CANCELED hedge attempt', { attempt: i + 1, host: parsed ? `${parsed.protocol}//${parsed.host}` : undefined, path: parsed ? parsed.pathname : undefined });
-        } else {
-          log.warn('http', 'FAIL', { status, message: e?.message || String(e), host: parsed ? `${parsed.protocol}//${parsed.host}` : undefined, path: parsed ? parsed.pathname : undefined, attempt: i + 1 });
-        }
         throw e;
       }
     })());
@@ -81,6 +71,8 @@ async function httpGet(url, headers = {}, retry = 0, timeoutMs = 15000) {
     return winner.resp;
   } catch (e) {
     // 所有并发尝试均失败
+    const status = e?.response?.status;
+    log.warn('http', 'FAIL(all hedged attempts)', { status, message: e?.message || String(e), host: parsed ? `${parsed.protocol}//${parsed.host}` : undefined, path: parsed ? parsed.pathname : undefined, parallel: hedgedCount });
     throw e;
   }
 }

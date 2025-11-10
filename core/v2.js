@@ -23,7 +23,6 @@ async function v2_getCodecItems(roomid, apiBase, qn, cookie) {
   const { wts, w_rid } = wbiSign(params);
   const q = new URLSearchParams({ ...params, wts: String(wts), w_rid });
   const full = `${url}?${q.toString()}`;
-  log.info('v2', '请求 getRoomPlayInfo', { api: apiBase, room_id: roomid, qn });
   const headers = {
     'Accept': 'application/json, text/javascript, */*; q=0.01',
     'Accept-Language': 'zh-CN',
@@ -76,20 +75,25 @@ async function v2_getCodecItems(roomid, apiBase, qn, cookie) {
     };
   });
 
-  // 打印每个 codec 的 CDN 信息
-  for (const s of streams) {
-    for (const f of s.formats || []) {
-      for (const ci of f.codecItem || []) {
-        const hosts = (ci.urlInfo || []).map(u => u.host).filter(Boolean);
-        if (log.isDebug()) {
-          log.debug('v2', 'codec 概览', {
-            format: f.formatName || '', codecName: ci.codecName || '', codecId: ci.codecId ?? '', currentQn: ci.currentQn,
-            acceptQn: ci.acceptQn || [], baseUrl: ci.baseUrl || '', cdnHostsCount: hosts.length,
-            cdnHosts: hosts.join(', '),
-          });
+  // 汇总打印: 避免逐条过多日志，按格式与编解码统计
+  if (log.isDebug()) {
+    const formatStats = {};
+    const hostSet = new Set();
+    for (const s of streams) {
+      for (const f of s.formats || []) {
+        for (const ci of f.codecItem || []) {
+          const fmt = f.formatName || 'unknown';
+          const codecName = ci.codecName || String(ci.codecId ?? '');
+          const stat = (formatStats[fmt] ||= { totalCodecItems: 0, codecs: {} });
+          stat.totalCodecItems += 1;
+          stat.codecs[codecName] = (stat.codecs[codecName] || 0) + 1;
+          for (const u of ci.urlInfo || []) {
+            if (u?.host) hostSet.add(u.host);
+          }
         }
       }
     }
+    log.debug('v2', 'codec 概览汇总', { streamCount: streams.length, hostUniqueCount: hostSet.size, formatStats });
   }
 
   // 在所有 format 中查找目标 codec, 优先选择 FLV
