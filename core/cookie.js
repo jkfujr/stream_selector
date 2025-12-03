@@ -96,11 +96,13 @@ function getRandomFromCache() {
  * @returns {Promise<boolean>} 是否成功刷新缓存
  */
 async function refreshCookieCache() {
-  const url = `${config.cookieMgmt.api_url}/api/v1/cookies`;
+  // 注意: 服务端可能对 URL 末尾斜杠敏感, 建议带上 '/' 以避免 307 Redirect
+  const url = `${config.cookieMgmt.api_url}/api/v1/cookies/`;
   log.debug('cookie', '批量获取Cookie列表', { url });
 
   try {
-    const resp = await httpGet(url, { token: config.cookieMgmt.token }, config.httpErrorRepeat, config.httpTimeoutMs);
+    const headers = { 'Authorization': `Bearer ${config.cookieMgmt.token}` };
+    const resp = await httpGet(url, headers, config.httpErrorRepeat, config.httpTimeoutMs);
     const cookies = resp.data;
 
     if (!Array.isArray(cookies)) {
@@ -153,7 +155,8 @@ async function getCookie() {
     const url = `${config.cookieMgmt.api_url}${config.cookieMgmt.path || '/api/cookie/random?type=sim'}`;
     log.debug('cookie', '降级到单次获取模式', { url });
     try {
-      const resp = await httpGet(url, { token: config.cookieMgmt.token }, config.httpErrorRepeat, config.httpTimeoutMs);
+      const headers = { 'Authorization': `Bearer ${config.cookieMgmt.token}` };
+      const resp = await httpGet(url, headers, config.httpErrorRepeat, config.httpTimeoutMs);
       const body = resp.data;
       const ck = unifyCookieFromResponse(body);
       return ck;
