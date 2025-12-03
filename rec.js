@@ -1,6 +1,6 @@
 const externalStreamApi = {
     enable: true,
-    api_url: 'http://10.0.0.101:38000',
+    api_url: 'http://127.0.0.1:38000',
     token: '114514',
 }
 

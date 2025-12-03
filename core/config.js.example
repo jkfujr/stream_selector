@@ -25,9 +25,6 @@ const config = {
   // API 列表
   apiList: [
     'https://api.live.bilibili.com',
-    'http://100.100.201.51:63000',
-    'http://100.100.201.61:63000',
-    'http://100.100.201.71:65301',
   ],
   // 说明:
   // - qn: 画质码率(如 25000、10000)
@@ -105,7 +102,7 @@ const config = {
   fixedCookie: '',
   // Cookie 管理
   cookieMgmt: {
-    enable: true,
+    enable: false,
     api_url: 'http://127.0.0.1:18000',
     token: '1145141919810',
     // path: '/api/cookie/random?type=sim', // 覆盖默认拉取路径
