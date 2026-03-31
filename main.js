@@ -1,8 +1,3 @@
-// 外置流选择
-//
-// 1) npm init -y
-// 2) npm install express axios
-// 3) node main.js
 const express = require('express');
 const { config } = require('./core/config');
 const { getCookie } = require('./core/cookie');

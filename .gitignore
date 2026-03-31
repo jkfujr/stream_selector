@@ -1,1 +1,3 @@
-scripts/analyze_log.js
+scripts/
+logs/
+.docs/
