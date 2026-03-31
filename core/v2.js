@@ -96,7 +96,7 @@ async function v2_getCodecItems(roomid, apiBase, qn, cookie) {
     log.debug('v2', 'codec 概览汇总', { streamCount: streams.length, hostUniqueCount: hostSet.size, formatStats });
   }
 
-  // 在所有 format 中查找目标 codec, 优先选择 FLV
+  // 在所有 format 中查找目标 codec, FLV 优先且根据配置过滤
   const pickCodec = (name) => {
     const candidates = [];
     for (const s of streams) {
@@ -105,16 +105,19 @@ async function v2_getCodecItems(roomid, apiBase, qn, cookie) {
           const isTargetByName = ci.codecName && ci.codecName === name;
           const isTargetById = (name === 'avc' && ci.codecId === 7) || (name === 'hevc' && ci.codecId === 12);
           if (isTargetByName || isTargetById) {
-            candidates.push({ ...ci, formatName: f.formatName || '' });
+            const isHls = /\.m3u8\b/i.test(ci.baseUrl || '') || /hls/i.test(f.formatName);
+          const isFlv = /flv/i.test(f.formatName) || /\.flv/i.test(ci.baseUrl || '');
+          if (config.allowHls || !isHls) {
+            // allowHls=false 时过滤掉 HLS, 只保留非 HLS(FLV)
+            candidates.push({ ...ci, formatName: f.formatName || '', isFlv });
+          }
           }
         }
       }
     }
     if (!candidates.length) return null;
     candidates.sort((a, b) => {
-      const aFlv = /flv/i.test(a.formatName) || /\.flv/i.test(a.baseUrl || '');
-      const bFlv = /flv/i.test(b.formatName) || /\.flv/i.test(b.baseUrl || '');
-      if (aFlv !== bFlv) return aFlv ? -1 : 1; // FLV 优先
+      if (a.isFlv !== b.isFlv) return a.isFlv ? -1 : 1; // FLV 优先
       const aLen = (a.acceptQn || []).length;
       const bLen = (b.acceptQn || []).length;
       if (aLen !== bLen) return bLen - aLen; // 可选清晰度多者优先

@@ -183,6 +183,15 @@ app.get('/api/stream-url', async (req, res) => {
       }
     }
 
+    // 不允许 HLS 时, 检测并过滤掉非 FLV 流
+    if (!config.allowHls) {
+      const isFlv = /\.flv\b/i.test(finalBest.url);
+      if (!isFlv) {
+        log.warn('flow', '选中的流不是FLV格式, 且allowHls=false, 返回无可用候选', { url: finalBest.url.substring(0, 120) });
+        return res.status(200).json({ code: 2, message: '无可用FLV流' });
+      }
+    }
+
     return res.status(200).json({
       code: 0,
       url: finalBest.url,

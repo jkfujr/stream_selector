@@ -111,5 +111,9 @@ const config = {
     token: '1145141919810',
     // path: '/api/cookie/random?type=sim', // 覆盖默认拉取路径
   },
+  // 允许返回 HLS (.m3u8) 流
+  // false: 仅返回 FLV 流, 无 FLV 时返回无可用流
+  // true: 允许返回 HLS 流
+  allowHls: false,
 };
 module.exports = { config };
